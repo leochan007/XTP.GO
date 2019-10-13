@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>XTP Trader Login</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <link rel="alternate icon" type="image/png" href="/i/favicon.png">
+  <link rel="stylesheet" href="/css/amazeui.min.css"/>
+  <style>
+    .header {
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 200%;
+      color: #333;
+      margin-top: 30px;
+    }
+    .header p {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="am-g">
+    <h1>XTP Trader</h1>
+    <p>Web Based Integrated XTP Trading Tool<br/>手动下单，自动下单</p>
+  </div>
+  <hr />
+</div>
+<div class="am-g">
+  <div class="am-u-lg-6 am-u-md-6 am-u-sm-centered">
+    <form id="login_form" method="post" class="am-form">
+      <label for="quote">行情前置机地址:</label>
+      <input type="text" name="" id="quote" value="120.27.164.138">
+      <label for="quote_port">行情前置机端口号:</label>
+      <input type="text" name="" id="quote_port" value="6002">
+      <br>
+      <label for="trader">交易前置机地址:</label>
+      <input type="text" name="" id="trader" value="120.27.164.69">
+      <label for="trader_port">交易前置机端口号:</label>
+      <input type="text" name="" id="trader_port" value="6001">
+      <br>
+      <label for="username">用户名:</label>
+      <input type="text" name="" id="username" value="15030798">
+      <br>
+      <label for="password">密码:</label>
+      <input type="password" name="" id="password" value="UgDUqNeK">
+      <br>
+      <div class="am-cf">
+        <input id="login_btn" type="submit" name="" value="登 录" class="am-btn am-btn-primary am-btn-sm am-fl">
+      </div>
+    </form>
+    <hr>
+    <p>© 2017 Written By Yifei Chan.</p>
+  </div>
+</div>
+
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="/js/login_action.js"></script>
+</body>
+</html>

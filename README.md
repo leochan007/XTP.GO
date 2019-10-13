@@ -1,2 +1,2 @@
-# XTP.GO
-go porting version for XTP.
+# xtp.go
+golang version xtp api

@@ -1,0 +1,9 @@
+.DS_Store
+
+*.tar.gz
+*.zip
+.vagrant
+go
+tar_files
+*.log
+cmake-*.sh
