@@ -12,7 +12,7 @@ method_pattern = re.compile("virtual\s(\w+)\s(\w+)\((.*)\)")
 
 COMMON_H = 'common_macro.h'
 
-CTP_INCLUDE_PATH = 'include/XTP'
+XTP_INCLUDE_PATH = 'include/XTP'
 
 CTP_H_Base = 'XTP'
 
@@ -61,6 +61,8 @@ fields = dict()
 VOID_PTR = '(unsigned long long int)this'
 
 Extern_Ptr_Param = 'unsigned long long int spiPtr'
+
+checkLst = [ 'XTPRI', 'XTPTPI', 'XTPST', 'XTPMD', 'XTPOB', 'XTPTBT', 'XTPQSI' ]
 
 md_concern_list = []
 trader_concern_list = []
@@ -122,7 +124,7 @@ typedef enum {false = 0, true = 1} bool;
         file_object.close()
         
 def get_class_info(ctp_api_file_name):
-    file_object = open(os.path.join(CTP_INCLUDE_PATH, '%s.h' % ctp_api_file_name), encoding = 'utf-8')
+    file_object = open(os.path.join(XTP_INCLUDE_PATH, '%s.h' % ctp_api_file_name), encoding = 'utf-8')
     try:
         all_the_text = file_object.read()
         api_start = all_the_text.rfind('class')
@@ -179,6 +181,36 @@ def get_api_interface_h_name_all(ctp_api_file_name):
 def get_Api_Function_Name(ctp_api_file_name, name):
     return '%s%s' % (get_api_short_name(ctp_api_file_name), name)
 
+def inCheckLst(param, lst):
+    for item in lst:
+        if param.find(item) >= 0:
+            return True
+    return False
+
+def genFields(info, isExtern = False):
+    for item in info[1]:
+        if item[2] != '' :
+            genFieldsInternal(item[2], isExtern)
+
+def genFieldsInternal(params, isExtern = False):
+    param_list = str(params).split(',')
+    for param in param_list:
+        format_param = param.strip()
+
+        idx = format_param.find('=')
+        
+        if (idx >= 0):
+            format_param = format_param[0:idx].strip()
+
+        idx = format_param.find('XTP_')
+        if (idx >= 0) :
+            fields[format_param[0: format_param.find(' ')]] = 0
+        else :
+
+            idx = format_param.find('XTP')
+            if (idx >= 0) :
+                fields[format_param[0:format_param.find(' ')]] = 0
+
 def get_c_def_params(params, isExtern = False):
     param_list = str(params).split(',')
     res_list = []
@@ -190,11 +222,41 @@ def get_c_def_params(params, isExtern = False):
         if (idx >= 0):
             format_param = format_param[0:idx].strip()
 
-        idx = format_param.find('THOST_TE_RESUME_TYPE')
-        
-        if (idx >= 0):
-            format_param = format_param.replace('THOST_TE_RESUME_TYPE', 'int')
+        idx = format_param.find('XTP_')
+        if (idx >= 0) :
+            idx2 = format_param.find(' ')
+            fields[format_param[0:idx2]] = 0
+            if isExtern :
+                data = GoPrefix + format_param
+            else:
+                data = 'enum ' + format_param
+            res_list.append(data)
+        else :
+            if isExtern :
+                format_param = format_param.replace('bool bIsLast', 'int bIsLast')
 
+            idx = format_param.find('XTP')
+            if (idx >= 0) :
+                idx2 = format_param.find(' ')
+                fields[format_param[0:idx2]] = 0
+
+                if isExtern :
+                    data = GoPrefix + format_param
+                else:
+                    #print('...format_param', format_param, ' inLst:', inCheckLst(format_param, checkLst))
+                    if not inCheckLst(format_param, checkLst) and format_param.find('Rsp') < 0:
+                        if format_param.find('const') >= 0:
+                            data = 'const struct' + format_param[5:]
+                        else:
+                            data = 'struct ' + format_param
+                    else:
+                        data = format_param
+
+                res_list.append(data)
+            else:
+                res_list.append(format_param)
+
+        '''
         idx = format_param.find('Field')
         if (idx >= 0) :
             idx2 = format_param.find(' ')
@@ -208,6 +270,8 @@ def get_c_def_params(params, isExtern = False):
             if isExtern :
                 format_param = format_param.replace('bool bIsLast', 'int bIsLast')
             res_list.append(format_param)
+        '''
+            
     return (', ').join(res_list)
 
 def get_params(params):
@@ -451,6 +515,7 @@ def gen_api_interface_cpp(info, ctp_api_file_name):
 
 def gen_ctp_api(ctp_api_file_name, enum_map):
     info = get_class_info(ctp_api_file_name)
+    genFields(info)
     gen_api_interface_h(info, ctp_api_file_name)
     #gen_api_interface_h_all(info, ctp_api_file_name)
     gen_api_interface_cpp(info, ctp_api_file_name)
@@ -548,22 +613,24 @@ def gen_def_go_file(md_info, trader_info, start_message) :
     finally:
         h_output.close()
 
-char_arr_pattern = re.compile('typedef\schar\s([A-Za-z]{1,}Type)\[\d{1,2}\];')
+#char_arr_pattern = re.compile('typedef\schar\s([A-Za-z]{1,}Type)\[\d{1,2}\];')
+#enum_arr_pattern = re.compile('enum\s([A-Za-z_]{1,}_TYPE)\s{0,}')
 
-enum_arr_pattern = re.compile('enum\s([A-Za-z_]{1,})\s{0,}')
+char_arr_pattern = re.compile('typedef\schar\s([A-Za-z]{1,}Type);')
+enum_arr_pattern = re.compile('enum\s([A-Za-z_]{1,})')
 
 output_wrapper_go_dir = '../go_src/xtp_wrapper'
 
 output_util_go_file = 'xtp_convert_util.go'
 
 def gen_convert_utils():
-    file_object = open(os.path.join(CTP_INCLUDE_PATH, 'xtp_api_data_type.h'), encoding = 'utf-8')
+    file_object = open(os.path.join(XTP_INCLUDE_PATH, 'xtp_api_data_type.h'), encoding = 'utf-8')
     char_arrs = list()
     enum_arrs = list()
     
     try:
         all_the_text = file_object.read()
-        #print all_the_text
+        #print(all_the_text)
         char_arrs = char_arr_pattern.findall(all_the_text)
         enum_arrs = enum_arr_pattern.findall(all_the_text)
     finally:
@@ -585,9 +652,9 @@ def gen_convert_utils():
 
 /*
 #cgo CFLAGS: -I../../C_porting_XTP/include/XTP
-#include "xtp_api_data_type.h"
 #include <stdlib.h>
 #include <string.h>
+#include "xtp_api_data_type.h"
 */
 import "C"
 ''')
@@ -618,10 +685,9 @@ def gen_define_h(enum_map) :
 #define LCDEFINE_H
 
 #include "xtp_api_struct.h"
-#include "xtp_api_data_type.h"
 ''')
 
-        for k, v in enum_map.items() :
+        for k, _ in enum_map.items() :
             h_output.write('''\ntypedef enum %s %s_;\n''' % (k, k))
             
         h_output.write('''      
@@ -630,7 +696,7 @@ extern "C" {
 #endif
 \n''')
         
-        for (k, v) in fields.items() :
+        for k, _ in fields.items() :
             h_output.write("typedef struct %s %s%s;\n" % (k, GoPrefix, k))
 
         h_output.write('''\n#ifdef __cplusplus

@@ -5,9 +5,9 @@ out_dir=bin
 currdir=$(shell pwd)
 #  -fno-eliminate-unused-debug-types
 CGO_CFLAGS+='-I../C_porting_XTP/include/XTP -I../C_porting_XTP/include/CXTPApi'
-CGO_LDFLAGS+='-L$(currdir)/../C_porting_XTP/lib/XTP/ -L$(currdir)/../C_porting_XTP/lib/CXTPApi/ -lCXTPApi -lxtpquoteapi -lxtptraderapi'
+CGO_LDFLAGS+='-L$(currdir)/../C_porting_XTP/lib/XTP/linux/ -L$(currdir)/../C_porting_XTP/lib/CXTPApi/ -lCXTPApi -lxtpquoteapi -lxtptraderapi'
 
-LD_LIBRARY_PATH+=$(currdir)/../C_porting_XTP/lib/CXTPApi:$(currdir)/../C_porting_XTP/lib/XTP
+LD_LIBRARY_PATH+=$(currdir)/../C_porting_XTP/lib/CXTPApi:$(currdir)/../C_porting_XTP/lib/XTP/linux
 
 ifdef M
 LOG=$(M)C

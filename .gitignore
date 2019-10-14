@@ -3,3 +3,4 @@ commentsRouter_controllers.go
 Debug
 Release
 build_prj
+.idea

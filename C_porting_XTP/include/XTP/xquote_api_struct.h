@@ -175,11 +175,11 @@ typedef struct XTPMarketDataStruct
     char ticker_status[8];
     ///数据
     union {
-        XTPMarketDataStockExData  stk;
-        XTPMarketDataOptionExData opt;
+        struct XTPMarketDataStockExData  stk;
+        struct XTPMarketDataOptionExData opt;
     } ;
     ///决定了union是哪种数据类型
-    XTP_MARKETDATA_TYPE data_type;
+    enum XTP_MARKETDATA_TYPE data_type;
     ///预留
     int32_t r4;
 } XTPMD;
@@ -293,8 +293,8 @@ typedef struct XTPTickByTickStruct {
     XTP_TBT_TYPE type;
 
     union {
-        XTPTickByTickEntrust entrust;
-        XTPTickByTickTrade     trade;
+        struct XTPTickByTickEntrust entrust;
+        struct XTPTickByTickTrade     trade;
     };
 } XTPTBT;
 
