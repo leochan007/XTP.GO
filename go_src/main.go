@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mkideal/cli"
+	"github.com/urfave/cli"
 	. "github.com/leochan007/xtp.go/go_src/xtp_wrapper"
 )
 

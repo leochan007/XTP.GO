@@ -21,9 +21,8 @@ $script = <<SCRIPT
 set -x
 
 cd #{SRCMOUNT}/devenv
-chmod +x setup.sh
+chmod +x *.sh
 ./setup.sh
-#source /home/ubuntu/.bashrc
 
 SCRIPT
 

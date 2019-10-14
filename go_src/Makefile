@@ -87,7 +87,9 @@ prepare_b:
 	rm ../build -rf && mkdir ../build && cd ../build && \
 	cmake ../C_porting_XTP/src/Platform -G "Unix Makefiles" -Wno-dev -DBoost_DEBUG=ON && make
     
-prepare: prepare_g prepare_b
+prepare: 
+	sudo go get github.com/urfave/cli
+	sudo go get github.com/op/go-logging
 
 remake_c:
 	cd ../build && make

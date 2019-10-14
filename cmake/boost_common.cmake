@@ -29,13 +29,12 @@ message(STATUS "BOOST_ROOT="${BOOST_ROOT})
 message(STATUS "BOOST_INCLUDEDIR="${BOOST_INCLUDEDIR})
 message(STATUS "BOOST_LIBRARYDIR="${BOOST_LIBRARYDIR})
 
-set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_ARCHITECTURE "-x64")
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 
-set(Boost_DEBUG OFF)
+#set(Boost_DEBUG ON)
 
 find_package(Boost REQUIRED COMPONENTS chrono program_options thread system filesystem date_time regex)
 
