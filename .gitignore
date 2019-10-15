@@ -4,3 +4,4 @@ Debug
 Release
 build_prj
 .idea
+__pycache__
