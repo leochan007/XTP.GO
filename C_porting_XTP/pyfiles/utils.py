@@ -56,30 +56,7 @@ def inCheckLst(param, lst):
             return True
     return False
 
-def genFields(info, isExtern = False):
-    for item in info[1]:
-        if item[2] != '' :
-            genFieldsInternal(item[2], isExtern)
-
-def genFieldsInternal(params, isExtern = False):
-    param_list = str(params).split(',')
-    for param in param_list:
-        format_param = param.strip()
-
-        idx = format_param.find('=')
-        
-        if (idx >= 0):
-            format_param = format_param[0:idx].strip()
-
-        idx = format_param.find('XTP_')
-        if (idx >= 0) :
-            fields[format_param[0: format_param.find(' ')]] = 0
-        else :
-            idx = format_param.find('XTP')
-            if (idx >= 0) :
-                fields[format_param[0:format_param.find(' ')]] = 0
-
-def get_c_def_params(params, isExtern = False):
+def get_interface_params(params, isExtern = False):
     param_list = str(params).split(',')
     res_list = []
     for param in param_list:
@@ -90,51 +67,40 @@ def get_c_def_params(params, isExtern = False):
         if (idx >= 0):
             format_param = format_param[0:idx].strip()
 
-        idx = format_param.find('XTP_')
-        if (idx >= 0) :
-            idx2 = format_param.find(' ')
-            fields[format_param[0:idx2]] = 0
-            if isExtern :
-                data = GoPrefix + format_param
-            else:
-                #data = 'enum ' + format_param
-                data = format_param[0:idx2] + '_' + format_param[idx2:]
-            res_list.append(data)
-        else :
+        tmps = format_param.split(' ')
+        
+        ind = 0
+        prefix = ''
+        if tmps[0].strip() == 'const':
+            prefix = 'const '
+            ind = 1
+        param_type = tmps[ind]
 
-            idx = format_param.find('XTP')
-            if (idx >= 0) :
-                idx2 = format_param.find(' ')
-                fields[format_param[0:idx2]] = 0
+        for k, v in typedefedStructs.items():
+            if v == param_type:
+                param_type = k
+                break
+            
+        param_name = tmps[ind + 1]
 
-                if isExtern :
-                    data = GoPrefix + format_param
-                else:
-                    #print('...format_param', format_param, ' inLst:', inCheckLst(format_param, typedefStructLst))
-                    if not inCheckLst(format_param, typedefStructLst) :
-                        if format_param.find('const') >= 0:
-                            data = 'const struct' + format_param[5:]
-                        else:
-                            data = 'struct ' + format_param
-                    else:
-                        data = format_param
+        if param_type in untypedefedStructs:
+            param_type = param_type + '_'
 
-                res_list.append(data)
-            else:
-                res_list.append(format_param)
+        res_list.append(prefix + param_type + ' ' + param_name)
             
     return (', ').join(res_list)
 
-def get_params(params):
+def get_impl_params(params):
+    print('params:', params)
     param_list = str(params).split(',')
     res_list = []
     for param in param_list:
         format_param = param.strip()
         format_param = format_param.replace('[]', '')
 
-        idx = format_param.find('*') + 1
-        if (idx >= 1) :
-            res_list.append(format_param[idx:])
+        idx = format_param.find('*')
+        if (idx >= 0) :
+            res_list.append(format_param[idx + 1:])
         else :
             params = format_param.split(' ')
             if len(params) == 3 and params[0].strip() == 'const' :

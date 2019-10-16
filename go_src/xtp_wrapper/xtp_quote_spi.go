@@ -44,7 +44,7 @@ func Go_quote_apiOnMarketData(spiPtr C.ulonglong, market_data *C.XTPMD) {
 	}
 	ctpLogger.Infof("Go_quote_apiOnMarketData:%v", marketData)
 
-	Enqueue(QuoteQueue, getIntValOfPtr(spiPtr), MD_ONMARKETDATA, unsafe.Pointer(marketData), nil, -1, 1)
+	Enqueue(QuoteQueue, getIntValOfPtr(spiPtr), MD_ONDEPTHMARKETDATA, unsafe.Pointer(marketData), nil, -1, 1)
 }
 
 //export Go_quote_apiOnSubOrderBook

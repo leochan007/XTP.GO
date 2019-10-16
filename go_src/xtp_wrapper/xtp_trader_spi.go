@@ -16,24 +16,24 @@ import (
 )
 
 //export Go_trader_apiOnOrderEvent
-func Go_trader_apiOnOrderEvent(spiPtr C.ulonglong, order_info *C.XTPOrderInfo_, error_info *C.XTPRI) {
+func Go_trader_apiOnOrderEvent(spiPtr C.ulonglong, order_info *C.XTPQueryOrderRsp, error_info *C.XTPRI) {
 	Enqueue(TraderQueue, getIntValOfPtr(spiPtr), TRADER_ONORDEREVENT, unsafe.Pointer(order_info),
 		unsafe.Pointer(error_info), -1, 1)
 }
 
 //export Go_trader_apiOnTradeEvent
-func Go_trader_apiOnTradeEvent(spiPtr C.ulonglong, trade_info *C.XTPTradeReport_) {
+func Go_trader_apiOnTradeEvent(spiPtr C.ulonglong, trade_info *C.XTPQueryTradeRsp) {
 	Enqueue(TraderQueue, getIntValOfPtr(spiPtr), TRADER_ONTRADEEVENT, unsafe.Pointer(trade_info), nil, -1, 1)
 }
 
 //export Go_trader_apiOnQueryOrder
-func Go_trader_apiOnQueryOrder(spiPtr C.ulonglong, order_info *C.XTPOrderInfo_, error_info *C.XTPRI, request_id C.int, is_last C.bool) {
+func Go_trader_apiOnQueryOrder(spiPtr C.ulonglong, order_info *C.XTPQueryOrderRsp, error_info *C.XTPRI, request_id C.int, is_last C.bool) {
 	Enqueue(TraderQueue, getIntValOfPtr(spiPtr), TRADER_ONQUERYORDER, unsafe.Pointer(order_info),
 		unsafe.Pointer(error_info), (int)(request_id), (int)(is_last))
 }
 
 //export Go_trader_apiOnQueryTrade
-func Go_trader_apiOnQueryTrade(spiPtr C.ulonglong, trade_info *C.XTPTradeReport_, error_info *C.XTPRI, request_id C.int, is_last C.bool) {
+func Go_trader_apiOnQueryTrade(spiPtr C.ulonglong, trade_info *C.XTPQueryTradeRsp, error_info *C.XTPRI, request_id C.int, is_last C.bool) {
 	Enqueue(TraderQueue, getIntValOfPtr(spiPtr), TRADER_ONQUERYTRADE, unsafe.Pointer(trade_info),
 		unsafe.Pointer(error_info), (int)(request_id), (int)(is_last))
 }

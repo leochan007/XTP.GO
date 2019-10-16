@@ -78,20 +78,21 @@ def gen_convert_utils():
 #cgo CFLAGS: -I../../C_porting_XTP/include/XTP
 #include <stdlib.h>
 #include <string.h>
-#include "xtp_api_data_type.h"
+#include "common_macro.h"
+#include "xtp_api_struct.h"
 */
 import "C"
 ''')
             
-        for k, _ in char_map.items() :
+    #    for k, _ in char_map.items() :
 
-            h_output.write('''
-func %s2CharArray(orignalStr string, output *C.%s) {
-    for i := 0; i < len(orignalStr); i++ {
-        (*output)[i] = C.char(orignalStr[i])
-    }
-}
-''' % (k, k))
+    #        h_output.write('''
+#func %s2CharArray(orignalStr string, output *C.%s) {
+#    for i := 0; i < len(orignalStr); i++ {
+#        (*output)[i] = C.char(orignalStr[i])
+#    }
+#}
+#''' % (k, k))
 
     except Exception as err:  
         print(err)
@@ -125,6 +126,138 @@ def get_class_info(xtp_api_file_name):
     finally:
         file_object.close()
 
+def gen_api_interface_h(info, xtp_api_file_name):
+    output_filename = get_api_interface_h_name(xtp_api_file_name)
+
+    macro_name = output_filename.upper().replace('.', '_')
+    h_output = open(os.path.join(output_api_dir, output_filename), 'w')
+    try:
+
+        h_output.write('#ifndef %s\n#define %s\n\n'% (macro_name, macro_name))
+        h_output.write('#include "%s"\n' % COMMON_H)
+        h_output.write('''\n#include "lcdefine.h"\n\n#ifdef __cplusplus\nextern "C" {\n#endif\n''')
+        
+        for item in info[1]:
+            func_name = get_FN_name(xtp_api_file_name, item[1])
+            if item[2] == '' :
+                h_output.write('typedef %s (* %s)();\n' % (item[0], func_name))
+            else :
+                h_output.write('typedef %s (* %s)(%s);\n' % (item[0], func_name, get_interface_params(item[2])))
+
+        h_output.write('\n//register callbacks\n')
+        h_output.write('%s void * Create%s();\n' % (LC_XTP_API, '%s%s' % (LC_PREFIX, getSpiClassName(info))))
+        h_output.write('%s void Release%s(void * * %s);\n' % (LC_XTP_API, '%s%s' % (LC_PREFIX, getSpiClassName(info)), pSpi_name))
+        for item in info[1]:
+            h_output.write('%s void %s(void * %s, %s pCallback);\n' % (LC_XTP_API, get_Register_Callback_Name(xtp_api_file_name, item[1]), pSpi_name, get_FN_name(xtp_api_file_name, item[1])))
+        
+        h_output.write('\n//api method porting\n')
+        
+        h_output.write('%s void * Create%s(uint8_t %s, const char * %s, XTP_LOG_LEVEL %s);\n'
+                           % (LC_XTP_API, '%s%s' % (LC_PREFIX, getApiClassName(info)), client_id, save_file_path, log_level))
+
+        h_output.write('%s void Release%s(void * * %s);\n' % (LC_XTP_API, '%s%s' % (LC_PREFIX, getApiClassName(info)), pApi_name))
+        for item in info[3]:
+            if item[1] == RegisterSpi :
+                h_output.write('%s void %s(void * %s, void * %s);\n' % (LC_XTP_API, get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name, pSpi_name))
+                continue
+            if item[2] == '' :
+                h_output.write('%s %s %s(void * %s);\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name))
+            else :
+                h_output.write('%s %s %s(void * %s, %s);\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name, get_interface_params(item[2])))
+        
+        h_output.write('''\n#ifdef __cplusplus\n}\n#endif\n#endif\n''')
+    finally:
+        h_output.close()
+
+def gen_api_interface_h_all(info, xtp_api_file_name):
+    output_filename = get_api_interface_h_name(xtp_api_file_name)
+    output_filename_all = get_api_interface_h_name_all(xtp_api_file_name)
+
+    macro_name = output_filename.upper().replace('.', '_')
+    h_output_all = open(os.path.join(output_api_dir, output_filename_all), 'w')
+    try:
+
+        h_output_all.write('#ifndef %s\n#define %s\n\n'% (macro_name, macro_name))
+        h_output_all.write('#include "%s"\n' % COMMON_H)
+        h_output_all.write('''\n#include "lcdefine.h"\n#include "%s"\n#ifdef __cplusplus\nextern "C" {\n#endif\n''' % (output_filename))
+
+        h_output_all.write('\n// define extern functions\n')
+
+        for item in info[1]:
+            func_name = get_Go_FN_name(xtp_api_file_name, item[1])
+            if not isInlist(func_name) :
+                continue
+            if item[2] == '' :
+                h_output_all.write('extern void %s(%s);\n' % (func_name, Extern_Ptr_Param))
+            else :
+                h_output_all.write('extern void %s(%s, %s);\n' % (func_name, Extern_Ptr_Param, get_interface_params(item[2], True)))
+        h_output_all.write('''\n#ifdef __cplusplus\n}\n#endif\n#endif\n''')
+    finally:
+        h_output_all.close()
+
+def gen_api_interface_cpp(info, xtp_api_file_name):
+    print ('\n---gen_api_interface_cpp xtp_api_file_name=', xtp_api_file_name, '\n')
+    output_filename = '%s%s.cxx' % (LC_PREFIX, xtp_api_file_name)
+    h_output = open(os.path.join(output_dir, output_filename), 'w')
+    try:
+        h_output.write('''#include "%s"\n''' % (get_api_interface_h_name(xtp_api_file_name)))
+        h_output.write('''#include "%s"\n\n''' % get_api_impl_h_name(xtp_api_file_name))
+        
+        #spi
+        h_output.write('\n// --- gen_api_interface_cpp spi ---\n')
+
+        h_output.write('%s void * Create%s()\n{\n\treturn (void *)(new %s);\n}\n\n'
+                       % (LC_XTP_API, '%s%s' % (LC_PREFIX, getSpiClassName(info)), get_spi_class_name(info)))
+        h_output.write('%s void Release%s(void * * %s)\n{\n\tif (*%s != NULL)\n\t{\n\t\tdelete *%s;\n\t\t*%s = NULL;\n\t}\n}\n\n'
+                       % (LC_XTP_API, '%s%s' % (LC_PREFIX, getSpiClassName(info)), pSpi_name, pSpi_name, pSpi_name, pSpi_name))
+
+        for item in info[1]:
+            h_output.write('void %s(void * %s, %s pCallback)\n' % (get_Register_Callback_Name(xtp_api_file_name, item[1]), pSpi_name, 
+                get_FN_name(xtp_api_file_name, item[1])))
+            h_output.write('{\n\tif (%s != NULL)\n\t{\n\t\t(Get%s(%s))->%s(pCallback);\n\t}\n}\n'
+                % (pSpi_name, get_spi_class_name(info), pSpi_name, get_Register_Callback_Name(xtp_api_file_name, item[1])))
+        
+        #api
+        h_output.write('\n// --- gen_api_interface_cpp api ---\n')
+
+        h_output.write('''%s void * Create%s(uint8_t %s, const char * %s, XTP_LOG_LEVEL %s)
+            \n{\n\treturn (void *)(%s::Create%s(%s, %s, %s));\n}\n\n'''
+            % (LC_XTP_API, '%s%s' % (LC_PREFIX, getApiClassName(info)), client_id, save_file_path, log_level,
+            getApiClassName(info), getApiClassName(info), client_id, save_file_path, log_level))
+        
+        h_output.write('void Release%s(void * * %s)\n{\n\tif (*%s != NULL)\n\t{\n\t\tdelete *%s;\n\t\t*%s = NULL;\n\t}\n}\n\n'
+            % ('%s%s' % (LC_PREFIX, getApiClassName(info)), pApi_name, pApi_name, pApi_name, pApi_name))
+
+        for item in info[3]:
+            if item[1] == RegisterSpi :
+                h_output.write('%s void %s(void * %s, void * %s)\n' % (LC_XTP_API, get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name, pSpi_name))
+                h_output.write('{\n\tif (%s != NULL)\n\t{\n\t\t(Get%s(%s))->%s(Get%s(%s));\n\t}\n}\n\n'
+                    %(pApi_name, getApiClassName(info), pApi_name, RegisterSpi, get_spi_class_name(info), pSpi_name))
+                continue
+            
+            attach_1 = ''
+            attach_2 = ''
+
+            if item[0] != 'void' :
+                attach_1 = 'return '
+                attach_2 = '\n\treturn -1;'
+                
+            if ( get_Api_Function_Name(xtp_api_file_name, item[1]) == '_quote_apiSubscribeAllOptionMarketData') :
+                print('spi item:', item)
+                print('--> get_Api_Function_Name:', get_Api_Function_Name(xtp_api_file_name, item[1]))
+                print('get_interface_params:', get_interface_params(item[2]))
+
+            if item[2] == '' :
+                h_output.write('%s %s %s(void* %s)\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name))
+                h_output.write('{\n\tif (%s != NULL)\n\t{\n\t\t%s(Get%s(%s))->%s();\n\t}%s\n}\n\n'
+                           % (pApi_name, attach_1, getApiClassName(info), pApi_name, item[1], attach_2))
+            else :
+                h_output.write('%s %s %s(void* %s, %s)\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name, get_interface_params(item[2])))
+                h_output.write('{\n\tif (%s != NULL)\n\t{\n\t\t%s(Get%s(%s))->%s(%s);\n\t}%s\n}\n\n'
+                           % (pApi_name, attach_1, getApiClassName(info), pApi_name, item[1], get_impl_params(item[2]), attach_2))        
+    finally:
+        h_output.close()
+    return output_filename
 
 def gen_api_impl_h(info, xtp_api_file_name):
     output_filename = get_api_impl_h_name(xtp_api_file_name)
@@ -187,7 +320,7 @@ def gen_api_impl_cpp(info, xtp_api_file_name):
             if (item[2] == '') :
                 h_output.write('\t(*m_%s)();\n' % (func_name))
             else :
-                h_output.write('\t(*m_%s)(%s);\n' % (func_name, get_params(item[2])))
+                h_output.write('\t(*m_%s)(%s);\n' % (func_name, get_impl_params(item[2])))
 
             '''            
             func_name = get_Go_FN_name(xtp_api_file_name, item[1])
@@ -198,146 +331,13 @@ def gen_api_impl_cpp(info, xtp_api_file_name):
             if (item[2] == '') :
                 h_output.write('\t %s(%s);\n' % (func_name, VOID_PTR))
             else :
-                h_output.write('\t %s(%s, %s);\n' % (func_name, VOID_PTR, get_params(item[2])))
+                h_output.write('\t %s(%s, %s);\n' % (func_name, VOID_PTR, get_impl_params(item[2])))
             '''
 
             h_output.write('}\n\n')
         
     finally:
         h_output.close()
-
-def gen_api_interface_h(info, xtp_api_file_name):
-    output_filename = get_api_interface_h_name(xtp_api_file_name)
-
-    macro_name = output_filename.upper().replace('.', '_')
-    h_output = open(os.path.join(output_api_dir, output_filename), 'w')
-    try:
-
-        h_output.write('#ifndef %s\n#define %s\n\n'% (macro_name, macro_name))
-        h_output.write('#include "%s"\n' % COMMON_H)
-        h_output.write('''\n#include "lcdefine.h"\n\n#ifdef __cplusplus\nextern "C" {\n#endif\n''')
-        
-        for item in info[1]:
-            func_name = get_FN_name(xtp_api_file_name, item[1])
-            if item[2] == '' :
-                h_output.write('typedef %s (* %s)();\n' % (item[0], func_name))
-            else :
-                h_output.write('typedef %s (* %s)(%s);\n' % (item[0], func_name, get_c_def_params(item[2])))
-
-        h_output.write('\n//register callbacks\n')
-        h_output.write('%s void * Create%s();\n' % (LC_XTP_API, '%s%s' % (LC_PREFIX, getSpiClassName(info))))
-        h_output.write('%s void Release%s(void * * %s);\n' % (LC_XTP_API, '%s%s' % (LC_PREFIX, getSpiClassName(info)), pSpi_name))
-        for item in info[1]:
-            h_output.write('%s void %s(void * %s, %s pCallback);\n' % (LC_XTP_API, get_Register_Callback_Name(xtp_api_file_name, item[1]), pSpi_name, get_FN_name(xtp_api_file_name, item[1])))
-        
-        h_output.write('\n//api method porting\n')
-        
-        h_output.write('%s void * Create%s(uint8_t %s, const char * %s, XTP_LOG_LEVEL_ %s);\n'
-                           % (LC_XTP_API, '%s%s' % (LC_PREFIX, getApiClassName(info)), client_id, save_file_path, log_level))
-
-        h_output.write('%s void Release%s(void * * %s);\n' % (LC_XTP_API, '%s%s' % (LC_PREFIX, getApiClassName(info)), pApi_name))
-        for item in info[3]:
-            if item[1] == RegisterSpi :
-                h_output.write('%s void %s(void * %s, void * %s);\n' % (LC_XTP_API, get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name, pSpi_name))
-                continue
-            if item[2] == '' :
-                h_output.write('%s %s %s(void * %s);\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name))
-            else :
-                h_output.write('%s %s %s(void * %s, %s);\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name, get_c_def_params(item[2])))
-        
-        h_output.write('''\n#ifdef __cplusplus\n}\n#endif\n#endif\n''')
-    finally:
-        h_output.close()
-
-def gen_api_interface_h_all(info, xtp_api_file_name):
-    output_filename = get_api_interface_h_name(xtp_api_file_name)
-    output_filename_all = get_api_interface_h_name_all(xtp_api_file_name)
-
-    macro_name = output_filename.upper().replace('.', '_')
-    h_output_all = open(os.path.join(output_api_dir, output_filename_all), 'w')
-    try:
-
-        h_output_all.write('#ifndef %s\n#define %s\n\n'% (macro_name, macro_name))
-        h_output_all.write('#include "%s"\n' % COMMON_H)
-        h_output_all.write('''\n#include "lcdefine.h"\n#include "%s"\n#ifdef __cplusplus\nextern "C" {\n#endif\n''' % (output_filename))
-
-        h_output_all.write('\n// define extern functions\n')
-
-        for item in info[1]:
-            func_name = get_Go_FN_name(xtp_api_file_name, item[1])
-            if not isInlist(func_name) :
-                continue
-            if item[2] == '' :
-                h_output_all.write('extern void %s(%s);\n' % (func_name, Extern_Ptr_Param))
-            else :
-                h_output_all.write('extern void %s(%s, %s);\n' % (func_name, Extern_Ptr_Param, get_c_def_params(item[2], True)))
-        h_output_all.write('''\n#ifdef __cplusplus\n}\n#endif\n#endif\n''')
-    finally:
-        h_output_all.close()
-
-def gen_api_interface_cpp(info, xtp_api_file_name):
-    print ('\n---gen_api_interface_cpp xtp_api_file_name=', xtp_api_file_name, '\n')
-    output_filename = '%s%s.cxx' % (LC_PREFIX, xtp_api_file_name)
-    h_output = open(os.path.join(output_dir, output_filename), 'w')
-    try:
-        h_output.write('''#include "%s"\n''' % (get_api_interface_h_name(xtp_api_file_name)))
-        h_output.write('''#include "%s"\n\n''' % get_api_impl_h_name(xtp_api_file_name))
-        
-        #spi
-        h_output.write('\n// --- gen_api_interface_cpp spi ---\n')
-
-        h_output.write('%s void * Create%s()\n{\n\treturn (void *)(new %s);\n}\n\n'
-                       % (LC_XTP_API, '%s%s' % (LC_PREFIX, getSpiClassName(info)), get_spi_class_name(info)))
-        h_output.write('%s void Release%s(void * * %s)\n{\n\tif (*%s != NULL)\n\t{\n\t\tdelete *%s;\n\t\t*%s = NULL;\n\t}\n}\n\n'
-                       % (LC_XTP_API, '%s%s' % (LC_PREFIX, getSpiClassName(info)), pSpi_name, pSpi_name, pSpi_name, pSpi_name))
-
-        for item in info[1]:
-            h_output.write('void %s(void * %s, %s pCallback)\n' % (get_Register_Callback_Name(xtp_api_file_name, item[1]), pSpi_name, 
-                get_FN_name(xtp_api_file_name, item[1])))
-            h_output.write('{\n\tif (%s != NULL)\n\t{\n\t\t(Get%s(%s))->%s(pCallback);\n\t}\n}\n'
-                % (pSpi_name, get_spi_class_name(info), pSpi_name, get_Register_Callback_Name(xtp_api_file_name, item[1])))
-        
-        #api
-        h_output.write('\n// --- gen_api_interface_cpp api ---\n')
-
-        h_output.write('''%s void * Create%s(uint8_t %s, const char * %s, XTP_LOG_LEVEL_ %s)
-            \n{\n\treturn (void *)(%s::Create%s(%s, %s, %s));\n}\n\n'''
-            % (LC_XTP_API, '%s%s' % (LC_PREFIX, getApiClassName(info)), client_id, save_file_path, log_level,
-            getApiClassName(info), getApiClassName(info), client_id, save_file_path, log_level))
-        
-        h_output.write('void Release%s(void * * %s)\n{\n\tif (*%s != NULL)\n\t{\n\t\tdelete *%s;\n\t\t*%s = NULL;\n\t}\n}\n\n'
-            % ('%s%s' % (LC_PREFIX, getApiClassName(info)), pApi_name, pApi_name, pApi_name, pApi_name))
-
-        for item in info[3]:
-            if item[1] == RegisterSpi :
-                h_output.write('%s void %s(void * %s, void * %s)\n' % (LC_XTP_API, get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name, pSpi_name))
-                h_output.write('{\n\tif (%s != NULL)\n\t{\n\t\t(Get%s(%s))->%s(Get%s(%s));\n\t}\n}\n\n'
-                    %(pApi_name, getApiClassName(info), pApi_name, RegisterSpi, get_spi_class_name(info), pSpi_name))
-                continue
-            
-            attach_1 = ''
-            attach_2 = ''
-
-            if item[0] != 'void' :
-                attach_1 = 'return '
-                attach_2 = '\n\treturn -1;'
-                
-            if ( get_Api_Function_Name(xtp_api_file_name, item[1]) == '_quote_apiSubscribeAllOptionMarketData') :
-                print('spi item:', item)
-                print('--> get_Api_Function_Name:', get_Api_Function_Name(xtp_api_file_name, item[1]))
-                print('get_c_def_params:', get_c_def_params(item[2]))
-
-            if item[2] == '' :
-                h_output.write('%s %s %s(void* %s)\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name))
-                h_output.write('{\n\tif (%s != NULL)\n\t{\n\t\t%s(Get%s(%s))->%s();\n\t}%s\n}\n\n'
-                           % (pApi_name, attach_1, getApiClassName(info), pApi_name, item[1], attach_2))
-            else :
-                h_output.write('%s %s %s(void* %s, %s)\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name, get_c_def_params(item[2])))
-                h_output.write('{\n\tif (%s != NULL)\n\t{\n\t\t%s(Get%s(%s))->%s(%s);\n\t}%s\n}\n\n'
-                           % (pApi_name, attach_1, getApiClassName(info), pApi_name, item[1], get_params(item[2]), attach_2))        
-    finally:
-        h_output.close()
-    return output_filename
     
 def gen_message_h(md_info, trader_info, start_message):
     h_output = open(os.path.join(output_api_dir, 'xtp_cmessage.h'), 'w')
@@ -416,10 +416,6 @@ def gen_def_go_file(md_info, trader_info, start_message) :
     finally:
         h_output.close()
 
-#char_arr_pattern = re.compile('typedef\schar\s([A-Za-z]{1,}Type)\[\d{1,2}\];')
-#enum_arr_pattern = re.compile('enum\s([A-Za-z_]{1,}_TYPE)\s{0,}')
-
-
 def gen_define_h(enum_map) :
     h_output = open(os.path.join(output_api_dir, 'lcdefine.h'), 'w')
     try:
@@ -428,18 +424,17 @@ def gen_define_h(enum_map) :
 
 #include "xtp_api_struct.h"
 ''')
-
-        for k, _ in enum_map.items() :
-            h_output.write('''\ntypedef enum %s %s_;\n''' % (k, k))
             
         h_output.write('''      
 #ifdef __cplusplus
 extern "C" {
-#endif
-\n''')
+#endif\n''')
+
+        for k, _ in untypedefedStructs.items() :
+            h_output.write('''\ntypedef struct %s %s_;\n''' % (k, k))
         
-        for k, _ in fields.items() :
-            h_output.write("typedef struct %s %s%s;\n" % (k, GoPrefix, k))
+        for k, _ in untypedefedEnums.items() :
+            h_output.write("typedef enum %s %s%s;\n" % (k, GoPrefix, k))
 
         h_output.write('''\n#ifdef __cplusplus
 }
@@ -452,7 +447,6 @@ extern "C" {
 
 def gen_xtp_api(xtp_api_file_name):
     info = get_class_info(xtp_api_file_name)
-    genFields(info)
     gen_api_interface_h(info, xtp_api_file_name)
     #gen_api_interface_h_all(info, xtp_api_file_name)
     gen_api_interface_cpp(info, xtp_api_file_name)

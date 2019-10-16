@@ -49,7 +49,7 @@ func Go_quote_apiSubscribeMarketData(quote_api unsafe.Pointer, stocks map[string
 		buf = append(buf, (*C.char)(uptr))
 	}
 	pointer := (**C.char)(unsafe.Pointer(&buf[0]))
-	return int(C._quote_apiSubscribeMarketData(quote_api, pointer, C.int(len(stocks)), C.XTP_EXCHANGE_TYPE_(e_type)))
+	return int(C._quote_apiSubscribeMarketData(quote_api, pointer, C.int(len(stocks)), C.XTP_EXCHANGE_TYPE(e_type)))
 }
 
 func GoReleaseLCQuoteApi(quote_api unsafe.Pointer) {

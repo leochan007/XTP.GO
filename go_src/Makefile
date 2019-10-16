@@ -99,8 +99,9 @@ build:
 	@rm -rf $(out_dir)
 	@mkdir $(out_dir)
 	@mv $(TARG) $(out_dir)
-	@cp -rf $(currdir)/../C_porting_CTP/lib/CXTPApi/*.so $(currdir)/../C_porting_XTP/lib/CTP/*.so strategy_d.json ../scripts/start.sh web_gui $(out_dir)
-	@chmod +x $(out_dir)/*.sh
+	@cp -rf $(currdir)/../C_porting_XTP/lib/CXTPApi/*.so $(currdir)/../C_porting_XTP/lib/XTP/linux/*.so ../scripts/start.sh $(out_dir)
+	#@cp -rf strategy_d.json web_gui $(out_dir)
+	#@chmod +x $(out_dir)/*.sh
 
 run:
 	@echo $(suffix)

@@ -1,13 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
-	"strings"
-	"time"
 
 	"github.com/urfave/cli"
+	"github.com/op/go-logging"
 	. "github.com/leochan007/xtp.go/go_src/xtp_wrapper"
 )
 
@@ -25,6 +23,7 @@ type argT struct {
 type StockMap map[string]string
 
 var (
+	log = logging.MustGetLogger("main.go")
 	Stocks = make(StockMap)
 )
 
@@ -49,7 +48,7 @@ func main() {
 				fmt.Println("quotehost:", c.String("quotehost"))
 				fmt.Println("quoteport:", c.String("quoteport"))
 				fmt.Println("traderhost:", c.String("traderhost"))
-				fmt.Println("traderport:", c.String("traderport"))
+				fmt.Println("traderport:", c.Int("traderport"))
 				fmt.Println("username:", c.String("username"))
 				fmt.Println("password:", c.String("password"))
 				fmt.Println("file:", c.String("file"))
@@ -60,7 +59,7 @@ func main() {
 				trader_api := GoCreateLCTraderApi(1, folder)
 				trader_spi := GoCreateLCTraderSpi()
 				Go_trader_apiRegisterSpi(trader_api, trader_spi)
-				loginResult := Go_trader_apiLogin(trader_api, c.String("traderhost"), c.String("traderport"), c.String("username"), c.String("password"))
+				loginResult := Go_trader_apiLogin(trader_api, c.String("traderhost"), c.Int("traderport"), c.String("username"), c.String("password"))
 
 				if loginResult == 0 {
 					fmt.Println("trader login OK.")

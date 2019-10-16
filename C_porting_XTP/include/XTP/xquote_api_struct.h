@@ -99,10 +99,10 @@ struct XTPMarketDataOptionExData {
     int64_t last_enquiry_time;
 };
 
-enum XTP_MARKETDATA_TYPE {
+typedef enum XTP_MARKETDATA_TYPE {
     XTP_MARKETDATA_ACTUAL = 0, // 现货(股票/基金/债券等)
     XTP_MARKETDATA_OPTION = 1, // 期权
-};
+}XTP_MARKETDATA_TYPE;
 
 ///行情
 typedef struct XTPMarketDataStruct
@@ -179,7 +179,7 @@ typedef struct XTPMarketDataStruct
         struct XTPMarketDataOptionExData opt;
     } ;
     ///决定了union是哪种数据类型
-    enum XTP_MARKETDATA_TYPE data_type;
+    XTP_MARKETDATA_TYPE data_type;
     ///预留
     int32_t r4;
 } XTPMD;

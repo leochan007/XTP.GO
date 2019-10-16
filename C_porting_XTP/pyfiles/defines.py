@@ -107,9 +107,11 @@ untypedefedStructs = {
     'XTPTickByTickTrade': '',
     'XTPOrderInsertInfo': '',
     'XTPOrderCancelInfo': '',
+    'XTPQueryOrderReq': '',
     'XTPQueryOrderByPageReq': '',
     'XTPQueryReportByExecIdReq': '',
     'XTPQueryTraderReq': '',
+    'XTPQueryTraderByPageReq': '',
     'XTPQueryAssetRsp': '',
     'XTPQueryStkPositionRsp': '',
     'XTPQueryFundTransferLogReq': '',
@@ -124,6 +126,7 @@ untypedefedStructs = {
     'XTPQueryOptionAuctionInfoRsp': '',
     'XTPCrdCashRepayRsp': '',
     'XTPCrdCashRepayInfo': '',
+    'XTPFundTransferReq': '',
 }
 
 typedefedEnums = {

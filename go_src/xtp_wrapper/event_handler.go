@@ -52,7 +52,7 @@ func quote_handle() {
 			continue
 		}
 		switch data.Type {
-		case MD_ONMARKETDATA:
+		case MD_ONDEPTHMARKETDATA:
 			market_data := (*MarketData)(data.Data)
 			ctpLogger.Infof("%v\n", market_data)
 		default:
@@ -82,7 +82,7 @@ func trader_handle() {
 		switch data.Type {
 		case TRADER_ONORDEREVENT:
 			fmt.Println("TRADER_ONORDEREVENT!")
-			order_info := (*C.XTPOrderInfo_)(data.Data)
+			order_info := (*C.XTPQueryOrderRsp)(data.Data)
 			fmt.Printf("[%v] [%v] [%v] market:%v\n", order_info.order_xtp_id, order_info.order_client_id,
 				GetGoString(&order_info.ticker[0]),
 				(XTP_EXCHANGE_TYPE)(order_info.market))
