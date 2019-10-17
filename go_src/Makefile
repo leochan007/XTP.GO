@@ -104,12 +104,11 @@ build:
 	@mkdir $(out_dir)
 	@mv $(TARG) $(out_dir)
 	@cp -rf $(currdir)/../C_porting_XTP/lib/CXTPApi/*.so $(currdir)/../C_porting_XTP/lib/XTP/linux/*.so ../scripts/start.sh $(out_dir)
-	#@cp -rf strategy_d.json web_gui $(out_dir)
+	#@cp -rf strategy_d.json $(out_dir)
 	#@chmod +x $(out_dir)/*.sh
 
 run:
-	@echo $(suffix)
-	CGO_LDFLAGS=$(CGO_LDFLAGS) LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) go run $(CGOFILES) $(suffix)
+	cd bin && ./start.sh
 	
 web:
 	cd lctp && go run *.go
