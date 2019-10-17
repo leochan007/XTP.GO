@@ -1,7 +1,20 @@
-# xtp.go
+## xtp.go
 golang version xtp api
 
-boost build
+# preinstall:
+1. vagrant
+2. virtualbox
+
+enter devenv directory, execute "vagrant up", then "vagrant ssh" to use the centos7 virtual machine for dev environment.
+
+build dir:
+./build.sh for generate c code for xtp api wrapper.
+
+go_src dir:
+"make dep" for fetching go library dependencies.
+"make build" for build go src.
+
+# boost build
 
 wget https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2
 
@@ -11,7 +24,8 @@ cd boost_1_70_0
 
 ./bootstrap.sh
 
-# --with-python
+    --with-python
+
 sudo ./b2 install --prefix=/usr/lib64/boost_1_70_0 --build-type=complete --layout=tagged link=static runtime-link=static --debug-configuration threading=multi debug release address-model=64 cflags=-fPIC cxxflags=-fPIC
 
 #vs2010

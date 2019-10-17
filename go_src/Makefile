@@ -51,6 +51,10 @@ talib:
 	go get github.com/d4l3k/talib
 
 dep:
+	go get github.com/op/go-logging
+	go get github.com/urfave/cli
+
+dep2:
 	sudo chown ubuntu:ubuntu /home/ubuntu/gopath/ -R
 	sudo apt-get install -y pkg-config
 	go get github.com/op/go-logging
