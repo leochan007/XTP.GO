@@ -88,15 +88,11 @@ prepare_g:
 	cd ../C_porting_XTP && python3 gen_cgo_code.py
 
 prepare_b:
-	rm ../build -rf && mkdir ../build && cd ../build && \
-	cmake ../C_porting_XTP/src/Platform -G "Unix Makefiles" -Wno-dev -DBoost_DEBUG=ON && make
+	cd ../build && ./build.sh
     
 prepare: 
 	sudo go get github.com/urfave/cli
 	sudo go get github.com/op/go-logging
-
-remake_c:
-	cd ../build && make
 
 build:
 	@CGO_CFLAGS=$(CGO_CFLAGS) CGO_LDFLAGS=$(CGO_LDFLAGS) go build -o $(TARG) $(CGOFILES)

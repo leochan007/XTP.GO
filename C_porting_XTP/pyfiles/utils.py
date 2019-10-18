@@ -45,7 +45,7 @@ def get_api_interface_h_name(xtp_api_file_name):
     return '%s%s.h' % (LC_PREFIX, xtp_api_file_name)
 
 def get_api_interface_h_name_all(xtp_api_file_name):
-    return '%s%s_all.h' % (LC_PREFIX, xtp_api_file_name)
+    return '%s%s_cgo.h' % (LC_PREFIX, xtp_api_file_name)
 
 def get_Api_Function_Name(xtp_api_file_name, name):
     return '%s%s' % (get_api_short_name(xtp_api_file_name), name)

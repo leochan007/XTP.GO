@@ -1,7 +1,7 @@
 package xtp_wrapper
 
 /*
-#cgo CFLAGS: -I../../C_porting_XTP/include/XTP -I../../C_porting_XTP/include/CXTPApi
+#cgo CFLAGS: -Wno-error=implicit-function-declaration -I../../C_porting_XTP/include/XTP -I../../C_porting_XTP/include/CXTPApi
 #include <string.h>
 #include "xtp_cmessage.h"
 #include "LCxtp_trader_api.h"
@@ -14,6 +14,12 @@ import (
 
 	. "github.com/leochan007/xtp.go/go_src/queue"
 )
+
+//export Go_trader_apiOnDisconnected
+func Go_trader_apiOnDisconnected(spiPtr C.ulonglong, session_id C.uint64_t, reason C.int)  {
+	Enqueue(TraderQueue, getIntValOfPtr(spiPtr), TRADER_ONDISCONNECTED, nil,
+	nil, -1, 1)
+}
 
 //export Go_trader_apiOnOrderEvent
 func Go_trader_apiOnOrderEvent(spiPtr C.ulonglong, order_info *C.XTPQueryOrderRsp, error_info *C.XTPRI) {

@@ -45,6 +45,7 @@ func main() {
 	var traderport int
 	var username string
 	var password string
+	var softKey string
 	var host string
 	var file string
 	var debug bool
@@ -59,6 +60,7 @@ func main() {
 		cli.IntFlag{Name: "traderport, o", Destination: &traderport},
 		cli.StringFlag{Name: "username, u", Destination: &username},
 		cli.StringFlag{Name: "password, w", Destination: &password},
+		cli.StringFlag{Name: "softkey, k", Destination: &softKey},
 		cli.StringFlag{Name: "host, H", Destination: &host},
 		cli.StringFlag{Name: "file, f", Destination: &file},
 		cli.BoolFlag{Name: "debug, d", Destination: &debug},
@@ -73,20 +75,38 @@ func main() {
 		fmt.Println("traderport:", traderport)
 		fmt.Println("username:", username)
 		fmt.Println("password:", password)
+		fmt.Println("softKey:", softKey)
 		fmt.Println("file:", file)
 		fmt.Println("debug:", debug)
 
 		folder := "xtp_con"
 
+		/*
 		trader_api := GoCreateLCTraderApi(1, folder)
 		trader_spi := GoCreateLCTraderSpi()
-		Go_trader_apiRegisterSpi(trader_api, trader_spi)
-		loginResult := Go_trader_apiLogin(trader_api, traderhost, traderport, username, password)
 
-		if loginResult == 0 {
-			fmt.Println("trader login OK.")
+		Go_trader_apiRegisterSpi(trader_api, trader_spi)
+
+		session_id := Go_trader_apiLogin(trader_api, traderhost, traderport, username, password, softKey)
+
+		if session_id != 0 {
+			fmt.Println("--- trader login OK.")
 		} else {
-			fmt.Println("trader failed.")
+			fmt.Println("--- trader failed.")
+		}
+		*/
+
+		quote_api := GoCreateLCQuoteApi(2, folder)
+		quote_spi := GoCreateLCQuoteSpi()
+
+		Go_quote_apiRegisterSpi(quote_api, quote_spi)
+		
+		session_id := Go_quote_apiLogin(quote_api, quotehost, quoteport, username, password)
+
+		if session_id != 0 {
+			fmt.Println("--- md login OK. session_id=", session_id)
+		} else {
+			fmt.Println("--- md failed.")
 		}
 
 		wg.Add(1)

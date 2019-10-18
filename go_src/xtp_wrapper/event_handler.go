@@ -80,6 +80,8 @@ func trader_handle() {
 			continue
 		}
 		switch data.Type {
+		case TRADER_ONDISCONNECTED:
+			fmt.Println("TRADER_ONDISCONNECTED!")
 		case TRADER_ONORDEREVENT:
 			fmt.Println("TRADER_ONORDEREVENT!")
 			order_info := (*C.XTPQueryOrderRsp)(data.Data)

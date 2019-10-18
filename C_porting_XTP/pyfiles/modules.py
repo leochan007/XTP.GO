@@ -75,7 +75,7 @@ def gen_convert_utils():
         h_output.write('''package xtp_wrapper
 
 /*
-#cgo CFLAGS: -I../../C_porting_XTP/include/XTP
+#cgo CFLAGS: -Wno-error=implicit-function-declaration -I../../C_porting_XTP/include/XTP -I../../C_porting_XTP/include/CXTPApi
 #include <stdlib.h>
 #include <string.h>
 #include "common_macro.h"
@@ -164,7 +164,20 @@ def gen_api_interface_h(info, xtp_api_file_name):
                 h_output.write('%s %s %s(void * %s);\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name))
             else :
                 h_output.write('%s %s %s(void * %s, %s);\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name, get_interface_params(item[2])))
-        
+
+        #'''
+        h_output.write('\n// define extern functions\n')
+
+        for item in info[1]:
+            func_name = get_Go_FN_name(xtp_api_file_name, item[1])
+            if not isInlist(func_name) :
+                continue
+            if item[2] == '' :
+                h_output.write('extern void %s(%s);\n' % (func_name, Extern_Ptr_Param))
+            else :
+                h_output.write('extern void %s(%s, %s);\n' % (func_name, Extern_Ptr_Param, get_interface_params(item[2], True)))
+        #'''
+
         h_output.write('''\n#ifdef __cplusplus\n}\n#endif\n#endif\n''')
     finally:
         h_output.close()
@@ -242,10 +255,10 @@ def gen_api_interface_cpp(info, xtp_api_file_name):
                 attach_1 = 'return '
                 attach_2 = '\n\treturn -1;'
                 
-            if ( get_Api_Function_Name(xtp_api_file_name, item[1]) == '_quote_apiSubscribeAllOptionMarketData') :
-                print('spi item:', item)
-                print('--> get_Api_Function_Name:', get_Api_Function_Name(xtp_api_file_name, item[1]))
-                print('get_interface_params:', get_interface_params(item[2]))
+            #if ( get_Api_Function_Name(xtp_api_file_name, item[1]) == '_quote_apiSubscribeAllOptionMarketData') :
+                #print('spi item:', item)
+                #print('--> get_Api_Function_Name:', get_Api_Function_Name(xtp_api_file_name, item[1]))
+                #print('get_interface_params:', get_interface_params(item[2]))
 
             if item[2] == '' :
                 h_output.write('%s %s %s(void* %s)\n' % (LC_XTP_API, item[0], get_Api_Function_Name(xtp_api_file_name, item[1]), pApi_name))
@@ -290,6 +303,8 @@ def gen_api_impl_h(info, xtp_api_file_name):
 def gen_api_impl_cpp(info, xtp_api_file_name):
     h_output = open(os.path.join(output_dir, get_api_impl_cpp_name(xtp_api_file_name)), 'w')
     try:
+        
+        h_output.write('#include <cstdio>\n')
         h_output.write('#include "%s"\n\n' % (get_api_impl_h_name(xtp_api_file_name)))
         h_output.write('%s * Get%s(void * %s)\n{\n' % (get_spi_class_name(info), get_spi_class_name(info), pSpi_name))
         h_output.write('\treturn (%s *)(%s);\n}\n\n' % (get_spi_class_name(info), pSpi_name))
@@ -316,23 +331,28 @@ def gen_api_impl_cpp(info, xtp_api_file_name):
             func_name = get_FN_name(xtp_api_file_name, item[1])
 
             ## todo list
-
+            '''
             if (item[2] == '') :
                 h_output.write('\t(*m_%s)();\n' % (func_name))
             else :
                 h_output.write('\t(*m_%s)(%s);\n' % (func_name, get_impl_params(item[2])))
-
             '''            
             func_name = get_Go_FN_name(xtp_api_file_name, item[1])
+
+            print(func_name, ' ', isInlist(func_name))
 
             if not isInlist(func_name) :
                 h_output.write('}\n\n')
                 continue
+            
+            h_output.write('\t printf("%s--%%s", "%s");\n' % (func_name, func_name))
             if (item[2] == '') :
                 h_output.write('\t %s(%s);\n' % (func_name, VOID_PTR))
+                h_output.write('\t// \t(*m_%s)();\n' % (func_name))
             else :
                 h_output.write('\t %s(%s, %s);\n' % (func_name, VOID_PTR, get_impl_params(item[2])))
-            '''
+                h_output.write('\t// \t(*m_%s)(%s);\n' % (func_name, get_impl_params(item[2])))
+            #'''
 
             h_output.write('}\n\n')
         

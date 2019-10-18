@@ -74,9 +74,11 @@ typedefStructLst = [ 'XTPRI', 'XTPTPI', 'XTPST', 'XTPMD', 'XTPOB', 'XTPTBT', 'XT
 md_concern_list = []
 trader_concern_list = []
 
-md_concern_list = [ 'Go_quote_apiOnSubMarketData', 'Go_quote_apiOnMarketData', 'Go_quote_apiOnSubOrderBook', 'Go_quote_apiOnOrderBook' ]
-trader_concern_list = [ 'Go_trader_apiOnOrderEvent', 'Go_trader_apiOnTradeEvent', 'Go_trader_apiOnQueryOrder', 'Go_trader_apiOnQueryTrade',
-	'Go_trader_apiOnQueryPosition', 'Go_trader_apiOnQueryAsset' ]
+#md_concern_list = [ 'Go_quote_apiOnSubMarketData', 'Go_quote_apiOnMarketData', 'Go_quote_apiOnSubOrderBook', 'Go_quote_apiOnOrderBook' ]
+trader_concern_list = [ 'Go_trader_apiOnDisconnected', 'Go_trader_apiOnOrderEvent', 'Go_trader_apiOnTradeEvent', 
+    'Go_trader_apiOnQueryOrder', 'Go_trader_apiOnQueryTrade', 'Go_trader_apiOnQueryPosition', 'Go_trader_apiOnQueryAsset' ]
+
+trader_concern_list = [ 'Go_trader_apiOnDisconnected' ]
 
 typedefedStructs = {
     'XTPRI': 'XTPRspInfoStruct',

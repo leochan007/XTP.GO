@@ -1,7 +1,7 @@
 package xtp_wrapper
 
 /*
-#cgo CFLAGS: -I../../C_porting_XTP/include/XTP -I../../C_porting_XTP/include/CXTPApi
+#cgo CFLAGS: -Wno-error=implicit-function-declaration -I../../C_porting_XTP/include/XTP -I../../C_porting_XTP/include/CXTPApi
 #include <string.h>
 #include "xtp_cmessage.h"
 #include "LCxtp_quote_api.h"
@@ -14,8 +14,6 @@ import (
 
 	"unsafe"
 )
-
-//#include "xtp_api_data_type.h"
 
 //export Go_quote_apiOnSubMarketData
 func Go_quote_apiOnSubMarketData(spiPtr C.ulonglong, ticker *C.XTPST, error_info *C.XTPRI, is_last C.bool) {

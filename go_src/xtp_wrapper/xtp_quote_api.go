@@ -1,7 +1,7 @@
 package xtp_wrapper
 
 /*
-#cgo CFLAGS: -I../../C_porting_XTP/include/XTP -I../../C_porting_XTP/include/CXTPApi
+#cgo CFLAGS: -Wno-error=implicit-function-declaration -I../../C_porting_XTP/include/XTP -I../../C_porting_XTP/include/CXTPApi
 #include <string.h>
 #include "xtp_cmessage.h"
 #include "LCxtp_quote_api.h"
@@ -31,14 +31,14 @@ func Go_quote_apiRegisterSpi(quote_api unsafe.Pointer, quote_spi unsafe.Pointer)
 	C._quote_apiRegisterSpi(quote_api, quote_spi)
 }
 
-func Go_quote_apiLogin(quote_api unsafe.Pointer, ip_addr string, port int, user string, pwd string) int {
+func Go_quote_apiLogin(quote_api unsafe.Pointer, ip_addr string, port int, user string, pwd string) uint64 {
 	ip_addr_s := C.CString(ip_addr)
 	defer C.free(unsafe.Pointer(ip_addr_s))
 	user_s := C.CString(user)
 	defer C.free(unsafe.Pointer(user_s))
 	pwd_s := C.CString(pwd)
 	defer C.free(unsafe.Pointer(pwd_s))
-	return int(C._quote_apiLogin(quote_api, ip_addr_s, C.int(port), user_s, pwd_s, C.XTP_PROTOCOL_TCP))
+	return (uint64)(C._quote_apiLogin(quote_api, ip_addr_s, C.int(port), user_s, pwd_s, C.XTP_PROTOCOL_TCP))
 }
 
 func Go_quote_apiSubscribeMarketData(quote_api unsafe.Pointer, stocks map[string]string, e_type int) int {
