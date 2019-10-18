@@ -15,6 +15,11 @@ import (
 	. "github.com/leochan007/xtp.go/go_src/queue"
 )
 
+//export Go_trader_apiOnError
+func Go_trader_apiOnError(spiPtr C.ulonglong, error_info *C.XTPRI) {
+	ctpLogger.Infof("Go_trader_apiOnError error_info=", error_info)
+}
+
 //export Go_trader_apiOnDisconnected
 func Go_trader_apiOnDisconnected(spiPtr C.ulonglong, session_id C.uint64_t, reason C.int)  {
 	Enqueue(TraderQueue, getIntValOfPtr(spiPtr), TRADER_ONDISCONNECTED, nil,

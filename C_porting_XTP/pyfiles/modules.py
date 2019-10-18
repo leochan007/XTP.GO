@@ -213,6 +213,8 @@ def gen_api_interface_cpp(info, xtp_api_file_name):
     output_filename = '%s%s.cxx' % (LC_PREFIX, xtp_api_file_name)
     h_output = open(os.path.join(output_dir, output_filename), 'w')
     try:
+
+        h_output.write('#include <cstdio>\n')
         h_output.write('''#include "%s"\n''' % (get_api_interface_h_name(xtp_api_file_name)))
         h_output.write('''#include "%s"\n\n''' % get_api_impl_h_name(xtp_api_file_name))
         

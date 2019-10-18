@@ -13,7 +13,7 @@ import (
 	"unsafe"
 )
 
-func GoCreateLCTraderApi(client_id int, folder string) unsafe.Pointer {
+func GoCreateLCTraderApi(client_id int8, folder string) unsafe.Pointer {
 	folder = folder + "/trader/"
 	os.MkdirAll(folder, 0777)
 	cs := C.CString(folder)
@@ -43,7 +43,7 @@ func Go_trader_apiLogin(trader_api unsafe.Pointer, ip_addr string, port int, use
 	defer C.free(unsafe.Pointer(user_s))
 	pwd_s := C.CString(pwd)
 	defer C.free(unsafe.Pointer(pwd_s))
-	return (uint64)(C._trader_apiLogin(trader_api, ip_addr_s, C.int(port), user_s, pwd_s, C.XTP_PROTOCOL_TCP))
+	return uint64(C._trader_apiLogin(trader_api, ip_addr_s, C.int(port), user_s, pwd_s, C.XTP_PROTOCOL_TCP))
 }
 
 func GoReleaseLCTraderApi(trader_api unsafe.Pointer) {

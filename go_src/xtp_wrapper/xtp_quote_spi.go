@@ -9,19 +9,27 @@ package xtp_wrapper
 import "C"
 
 import (
+
 	. "github.com/leochan007/xtp.go/go_src/defs"
 	. "github.com/leochan007/xtp.go/go_src/queue"
 
 	"unsafe"
 )
 
-//export Go_quote_apiOnSubMarketData
-func Go_quote_apiOnSubMarketData(spiPtr C.ulonglong, ticker *C.XTPST, error_info *C.XTPRI, is_last C.bool) {
-	ctpLogger.Infof("Go_quote_apiOnSubMarketData")
+//export Go_quote_apiOnError
+func Go_quote_apiOnError(spiPtr C.ulonglong, error_info *C.XTPRI) {
+	ctpLogger.Infof("Go_quote_apiOnError error_info=", error_info)
 }
 
-//export Go_quote_apiOnMarketData
-func Go_quote_apiOnMarketData(spiPtr C.ulonglong, market_data *C.XTPMD) {
+//export Go_quote_apiOnSubMarketData
+func Go_quote_apiOnSubMarketData(spiPtr C.ulonglong, ticker *C.XTPST, error_info *C.XTPRI, is_last C.bool) {
+	ctpLogger.Infof("Go_quote_apiOnSubMarketData ticker=", ticker)
+}
+
+//export Go_quote_apiOnDepthMarketData
+func Go_quote_apiOnDepthMarketData(spiPtr C.ulonglong, market_data *C.XTPMD, bid1_qty *C.int64_t, 
+	bid1_count C.int32_t, max_bid1_count C.int32_t, ask1_qty *C.int64_t, ask1_count C.int32_t, max_ask1_count C.int32_t) {
+
 	marketData := new(MarketData)
 	marketData.Exchange_id = (XTP_EXCHANGE_TYPE)(market_data.exchange_id)
 	marketData.Ticker = GetGoString(&market_data.ticker[0])
@@ -40,9 +48,12 @@ func Go_quote_apiOnMarketData(spiPtr C.ulonglong, market_data *C.XTPMD) {
 		marketData.Bid_qty[i] = (int64)(market_data.bid_qty[i])
 		marketData.Ask_qty[i] = (int64)(market_data.ask_qty[i])
 	}
-	ctpLogger.Infof("Go_quote_apiOnMarketData:%v", marketData)
 
-	Enqueue(QuoteQueue, getIntValOfPtr(spiPtr), MD_ONDEPTHMARKETDATA, unsafe.Pointer(marketData), nil, -1, 1)
+	ctpLogger.Infof("Go_quote_apiOnDepthMarketData:%v", marketData)
+	ctpLogger.Infof("Ticker:%v", marketData.Ticker)
+	ctpLogger.Infof("Last_price:%v", marketData.Last_price)
+
+	Enqueue(TraderQueue, getIntValOfPtr(spiPtr), MD_ONDEPTHMARKETDATA, unsafe.Pointer(marketData), nil, -1, 1)
 }
 
 //export Go_quote_apiOnSubOrderBook

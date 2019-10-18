@@ -35,7 +35,7 @@ func query_handle() {
 }
 
 func quote_handle() {
-	//defer close(QuoteQueue)
+	// defer close(QuoteQueue)
 	for {
 		val, ok, _ := QuoteQueue.Get()
 		if !ok {
@@ -64,7 +64,7 @@ func quote_handle() {
 }
 
 func trader_handle() {
-	//defer close(TraderQueue)
+	// defer close(TraderQueue)
 	for {
 		val, ok, _ := TraderQueue.Get()
 		if !ok {
@@ -80,6 +80,9 @@ func trader_handle() {
 			continue
 		}
 		switch data.Type {
+		case MD_ONDEPTHMARKETDATA:
+			market_data := (*MarketData)(data.Data)
+			ctpLogger.Infof("%v\n", market_data)
 		case TRADER_ONDISCONNECTED:
 			fmt.Println("TRADER_ONDISCONNECTED!")
 		case TRADER_ONORDEREVENT:

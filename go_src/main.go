@@ -8,6 +8,8 @@ import (
 	"sync"
 	"github.com/urfave/cli"
 	"github.com/op/go-logging"
+
+	. "github.com/leochan007/xtp.go/go_src/defs"
 	. "github.com/leochan007/xtp.go/go_src/xtp_wrapper"
 )
 
@@ -67,7 +69,6 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		fmt.Println("Hello %q", c.Args())
 
 		fmt.Println("quotehost:", quotehost)
 		fmt.Println("quoteport:", quoteport)
@@ -96,17 +97,20 @@ func main() {
 		}
 		*/
 
-		quote_api := GoCreateLCQuoteApi(2, folder)
+		quote_api := GoCreateLCQuoteApi(1, folder)
 		quote_spi := GoCreateLCQuoteSpi()
 
 		Go_quote_apiRegisterSpi(quote_api, quote_spi)
-		
-		session_id := Go_quote_apiLogin(quote_api, quotehost, quoteport, username, password)
 
-		if session_id != 0 {
-			fmt.Println("--- md login OK. session_id=", session_id)
+		Stocks["000001"] = "000001"
+		
+		loginResult := Go_quote_apiLogin(quote_api, quotehost, quoteport, username, password)
+
+		if loginResult == 0 {
+			fmt.Println("--- md login OK. loginResult=", loginResult)
+			Go_quote_apiSubscribeMarketData(quote_api, Stocks, (int)(XTP_EXCHANGE_SH))
 		} else {
-			fmt.Println("--- md failed.")
+			fmt.Println("--- md failed. loginResult=", loginResult)
 		}
 
 		wg.Add(1)

@@ -1,6 +1,6 @@
 package defs
 
-type XTP_EXCHANGE_TYPE int32
+type XTP_EXCHANGE_TYPE int
 
 const (
 	XTP_EXCHANGE_SH XTP_EXCHANGE_TYPE = 1 + iota

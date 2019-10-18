@@ -38,6 +38,6 @@ func init() {
 	md_id = 0
 	trader_id = 0
 	go query_handle()
-	go quote_handle()
-	//go trader_handle()
+	//go quote_handle()
+	go trader_handle()
 }
