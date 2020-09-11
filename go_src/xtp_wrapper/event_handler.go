@@ -12,8 +12,8 @@ import "C"
 import (
 	"fmt"
 
-	. "github.com/leochan007/xtp.go/go_src/defs"
-	. "github.com/leochan007/xtp.go/go_src/queue"
+	. "xtp.go/defs"
+	. "xtp.go/queue"
 )
 
 func query_handle() {

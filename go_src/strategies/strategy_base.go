@@ -1,7 +1,7 @@
 package strategies
 
 import (
-	. "leochan007/xtp.go/go_src/defs"
+	. "xtp.go/defs"
 )
 
 type IStrategy interface {

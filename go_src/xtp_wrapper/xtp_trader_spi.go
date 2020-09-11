@@ -12,7 +12,7 @@ import (
 	//"os"
 	"unsafe"
 
-	. "github.com/leochan007/xtp.go/go_src/queue"
+	. "xtp.go/queue"
 )
 
 //export Go_trader_apiOnError
