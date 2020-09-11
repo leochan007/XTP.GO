@@ -5,28 +5,27 @@ import (
 	"os"
 	"os/signal"
 
-	"sync"
 	"github.com/urfave/cli"
 	"github.com/op/go-logging"
-
-	. "github.com/leochan007/xtp.go/go_src/defs"
-	. "github.com/leochan007/xtp.go/go_src/xtp_wrapper"
+	"sync"
+	. "xtp.go/defs"
+	. "xtp.go/xtp_wrapper"
 )
 
 type StockMap map[string]string
 
 var (
-	log = logging.MustGetLogger("go_xtp_trader")
+	log    = logging.MustGetLogger("go_xtp_trader")
 	Stocks = make(StockMap)
-	wg sync.WaitGroup
-	c chan os.Signal
+	wg     sync.WaitGroup
+	c      chan os.Signal
 )
 
 func waitForSignal() {
-	LOOP:
+LOOP:
 	for {
 		select {
-			case <-c:
+		case <-c:
 			break LOOP
 		default:
 		}
@@ -37,9 +36,9 @@ func waitForSignal() {
 }
 
 func main() {
-	
+
 	c = make(chan os.Signal, 1)
-    signal.Notify(c, os.Interrupt, os.Kill)
+	signal.Notify(c, os.Interrupt, os.Kill)
 
 	var quotehost string
 	var quoteport int
@@ -55,7 +54,7 @@ func main() {
 	app := cli.NewApp()
 	app.UseShortOptionHandling = true
 	app.Version = "0.0.1"
-	app.Flags = []cli.Flag {
+	app.Flags = []cli.Flag{
 		cli.StringFlag{Name: "quotehost, q", Destination: &quotehost},
 		cli.IntFlag{Name: "quoteport, p", Destination: &quoteport},
 		cli.StringFlag{Name: "traderhost, r", Destination: &traderhost},
@@ -83,18 +82,18 @@ func main() {
 		folder := "xtp_con"
 
 		/*
-		trader_api := GoCreateLCTraderApi(1, folder)
-		trader_spi := GoCreateLCTraderSpi()
+			trader_api := GoCreateLCTraderApi(1, folder)
+			trader_spi := GoCreateLCTraderSpi()
 
-		Go_trader_apiRegisterSpi(trader_api, trader_spi)
+			Go_trader_apiRegisterSpi(trader_api, trader_spi)
 
-		session_id := Go_trader_apiLogin(trader_api, traderhost, traderport, username, password, softKey)
+			session_id := Go_trader_apiLogin(trader_api, traderhost, traderport, username, password, softKey)
 
-		if session_id != 0 {
-			fmt.Println("--- trader login OK.")
-		} else {
-			fmt.Println("--- trader failed.")
-		}
+			if session_id != 0 {
+				fmt.Println("--- trader login OK.")
+			} else {
+				fmt.Println("--- trader failed.")
+			}
 		*/
 
 		quote_api := GoCreateLCQuoteApi(1, folder)
@@ -103,7 +102,7 @@ func main() {
 		Go_quote_apiRegisterSpi(quote_api, quote_spi)
 
 		Stocks["000001"] = "000001"
-		
+
 		loginResult := Go_quote_apiLogin(quote_api, quotehost, quoteport, username, password)
 
 		if loginResult == 0 {
@@ -118,7 +117,7 @@ func main() {
 		wg.Wait()
 
 		return nil
-	  }
+	}
 
 	err := app.Run(os.Args)
 

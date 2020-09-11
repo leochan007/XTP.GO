@@ -10,8 +10,8 @@ import "C"
 
 import (
 
-	. "github.com/leochan007/xtp.go/go_src/defs"
-	. "github.com/leochan007/xtp.go/go_src/queue"
+	. "xtp.go/defs"
+	. "xtp.go/queue"
 
 	"unsafe"
 )
