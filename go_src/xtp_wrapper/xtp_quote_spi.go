@@ -2,6 +2,7 @@ package xtp_wrapper
 
 /*
 #cgo CFLAGS: -Wno-error=implicit-function-declaration -I../../C_porting_XTP/include/XTP -I../../C_porting_XTP/include/CXTPApi
+#cgo LDFLAGS: -L../../C_porting_XTP/lib/CXTPApi -lCXTPApi -lxtpquoteapi -lxtptraderapi
 #include <string.h>
 #include "xtp_cmessage.h"
 #include "LCxtp_quote_api.h"
